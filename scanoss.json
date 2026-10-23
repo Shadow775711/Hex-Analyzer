@@ -1,0 +1,10 @@
+{
+  "bom": {
+    "remove": [
+      {
+        "purl": "pkg:github/shadow775711/hex-analyzer",
+        "comment": "Our own repository (public, so it ends up in the osskb database) — matches against ourselves are not an infringement"
+      }
+    ]
+  }
+}

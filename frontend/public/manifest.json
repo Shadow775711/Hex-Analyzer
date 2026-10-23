@@ -1,0 +1,15 @@
+{
+  "short_name": "Hex Analyzer",
+  "name": "Hex Analyzer",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#141414",
+  "background_color": "#141414"
+}

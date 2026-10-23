@@ -1,0 +1,89 @@
+# Hardened defaults for every container: read-only root filesystem, no Linux capabilities,
+# no privilege escalation, memory and process limits. Writable places are only the data
+# volumes and small tmpfs mounts.
+x-hardening: &hardening
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  restart: unless-stopped
+
+services:
+  backend:
+    <<: *hardening
+    build: ./backend
+    container_name: hex-backend
+    # No "ports": the backend is visible only inside the Docker network, from outside it goes through nginx (/api)
+    environment:
+      DATA_DIR: /app/data
+      ARCHIVE: "1"          # 0 = no .gz copies
+      JOB_TTL_HOURS: "0"    # e.g. 72 = clean up jobs older than 3 days
+      # Host headers the backend accepts (DNS rebinding protection); localhost = healthcheck
+      ALLOWED_HOSTS: "${HEX_HOSTS:-localhost},localhost"
+    volumes:
+      - hex_data:/app/data  # uploads/, jobs/, archive/, tmp/ and hex.db in one place
+    tmpfs:
+      - /tmp:size=16m
+    networks: [app]         # reachable only from the frontend's nginx, never from Caddy directly
+    mem_limit: 1g
+    pids_limit: 256
+    # healthcheck defined in backend/Dockerfile
+
+  frontend:
+    <<: *hardening
+    build: ./frontend
+    container_name: hex-frontend
+    # no "ports": reachable from outside only through Caddy (HTTPS + password)
+    tmpfs:
+      - /tmp:size=32m       # nginx pid file and small temp files (uploads are streamed, not buffered)
+    networks: [edge, app]   # the only bridge between Caddy and the backend
+    mem_limit: 128m
+    pids_limit: 64
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  caddy:
+    <<: *hardening
+    image: caddy:2.11.7@sha256:504a44d7d74bd2bc28a66afc4774912fc21223ca8a67734af1c54ab2f999b489
+    container_name: hex-caddy
+    cap_add: [NET_BIND_SERVICE]   # the only capability it needs: listening on 80/443
+    ports:
+      # HEX_BIND (in .env): which address to listen on. Default 127.0.0.1 = this computer only.
+      # Docker bypasses the host firewall, so 0.0.0.0 exposes the login page on every network.
+      - "${HEX_BIND:-127.0.0.1}:80:80"     # redirect to HTTPS only
+      - "${HEX_BIND:-127.0.0.1}:443:443"
+    environment:
+      HEX_HOSTS: ${HEX_HOSTS:-localhost}   # from the .env file next to compose
+      HEX_DEFAULT_SNI: ${HEX_DEFAULT_SNI:-localhost}
+    volumes:
+      # only the two files Caddy needs — caddy/password.txt stays outside the container;
+      # create_host_path: false → fail instead of silently creating a directory if missing
+      - type: bind
+        source: ./caddy/Caddyfile
+        target: /etc/caddy/Caddyfile
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: ./caddy/auth.caddy
+        target: /etc/caddy/auth.caddy
+        read_only: true
+        bind: { create_host_path: false }
+      - caddy_data:/data       # CA and certificates — don't delete, or the CA must be imported again
+      - caddy_config:/config
+    tmpfs:
+      - /tmp:size=16m
+    networks: [edge]
+    mem_limit: 256m
+    pids_limit: 128
+    depends_on:
+      - frontend
+
+networks:
+  edge: {}                  # Caddy ↔ frontend
+  app:
+    internal: true          # frontend ↔ backend; no route to the internet either
+
+volumes:
+  hex_data:
+  caddy_data:
+  caddy_config:

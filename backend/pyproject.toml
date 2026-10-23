@@ -1,0 +1,24 @@
+# Backend tool configuration (dependencies: requirements.txt / requirements-dev.txt)
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+# E/F: errors and unused code, I: import order, B: common pitfalls,
+# UP: modern syntax, SIM: simplifications, S: security (bandit)
+select = ["E", "F", "I", "B", "UP", "SIM", "S"]
+ignore = [
+  "E501",   # line length is handled by the formatter
+  "S101",   # assert is fine in tests
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "E731"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["main", "models", "modules", "conftest"]

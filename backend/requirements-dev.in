@@ -1,0 +1,8 @@
+# Developer tools (tests, lint) — not included in the Docker image. Lock: requirements-dev.txt
+#   pip-compile --generate-hashes --strip-extras --allow-unsafe -o requirements-dev.txt requirements-dev.in
+-c requirements.txt
+-r requirements.in
+pytest==9.1.1
+httpx2==2.16.0
+ruff==0.17.2
+pip-licenses==5.5.5

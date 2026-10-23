@@ -1,0 +1,42 @@
+name: Bug report
+description: Something does not work as it should
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! **Report security vulnerabilities privately** — see SECURITY.md.
+        Do not attach private files — a description or a crafted example is enough.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, what you saw.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce
+      placeholder: |
+        1. Upload file … (type, size)
+        2. Open the … tab
+        3. …
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / errors
+      description: "`docker logs hex-backend`, browser console (F12). Remove private data from them."
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      placeholder: e.g. main @ a1b2c3d
+  - type: dropdown
+    id: how
+    attributes:
+      label: How do you run it?
+      options: [Docker Compose, locally (uvicorn + npm run dev), other]

@@ -1,0 +1,36 @@
+# Weekly dependency updates — grouped so the repo is not flooded with PRs.
+# cooldown: new releases wait a few days first — freshly published malicious versions
+# are usually caught and pulled within that window.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /backend
+    schedule: { interval: weekly }
+    cooldown: { default-days: 5 }
+    groups:
+      python: { patterns: ["*"] }
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule: { interval: weekly }
+    cooldown: { default-days: 5 }
+    groups:
+      npm-dev:
+        dependency-type: development
+      npm-prod:
+        dependency-type: production
+
+  - package-ecosystem: docker
+    directories: [/backend, /frontend]
+    schedule: { interval: weekly }
+    cooldown: { default-days: 5 }
+
+  - package-ecosystem: docker-compose # the Caddy image in docker-compose.yml
+    directory: /
+    schedule: { interval: weekly }
+    cooldown: { default-days: 5 }
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+    cooldown: { default-days: 5 }

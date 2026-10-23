@@ -1,0 +1,25 @@
+# Rejects PRs from bot accounts and PRs without the author declaration (see AGENTS.md, CONTRIBUTING.md).
+# Make this check required in the branch protection of main.
+#
+# pull_request_target: the workflow and the script run from the BASE branch, so a PR cannot
+# switch the check off by editing them. This is safe here because the PR's code is never
+# checked out or executed — the script only reads the PR description from the event file.
+name: PR policy
+
+on:
+  pull_request_target:
+    types: [opened, edited, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  pr-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false # base branch (default for pull_request_target) — never the PR head
+      - name: Author and declaration
+        run: python3 .github/scripts/pr_policy.py "$GITHUB_EVENT_PATH"

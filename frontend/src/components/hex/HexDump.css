@@ -1,0 +1,149 @@
+/* HEX viewer — styles for the HexDumpVirtualized component */
+.hx-wrap {
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1e1e1e;
+  color: #dcdcdc;
+  position: relative;
+  border: 1px solid #2a2a2a;
+}
+
+.hx-outer {
+  overflow-y: auto !important;
+  scrollbar-gutter: stable;
+  /* Firefox ignores ::-webkit-scrollbar — standard property for a dark, thin scrollbar */
+  scrollbar-color: #555 #2a2a2a;
+  scrollbar-width: thin;
+}
+.hx-outer::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.hx-outer::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 6px;
+}
+.hx-outer::-webkit-scrollbar-thumb:hover {
+  background: #6b6b6b;
+}
+.hx-outer::-webkit-scrollbar-track {
+  background: #2a2a2a;
+}
+
+.hx-row {
+  font-family: ui-monospace, Menlo, monospace;
+  padding-left: 0.5rem;
+  display: grid;
+  grid-template-columns:
+    9ch
+    calc(var(--cols) * 3ch + 2ch)
+    auto;
+  align-items: baseline;
+  will-change: transform;
+  line-height: 1.4;
+}
+
+.hx-off {
+  color: #888;
+}
+.hx-hex {
+  white-space: pre;
+}
+
+.hx-cell {
+  display: inline-block;
+  width: 2ch;
+  margin-right: 1ch;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 2px;
+  transition: background-color 0.06s linear;
+}
+.hx-cell.hx-gap {
+  margin-right: 2ch;
+}
+.hx-cell.hx-pad {
+  opacity: 0;
+  pointer-events: none;
+}
+.hx-cell:hover {
+  background: #ffffff22;
+}
+.hx-cell.hx-sel,
+.hx-cell.hx-range {
+  background: #2a82da55;
+}
+
+.hx-asc {
+  white-space: pre;
+  display: inline-block;
+  font-size: var(--ascSize, 14px);
+  color: #e6e6e6;
+  padding-left: 10px;
+  border-left: 1px dashed #3a3a3a;
+  width: calc(16ch + 4ch);
+}
+.hx-asc-cell {
+  display: inline-block;
+  width: 1ch;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 2px;
+}
+.hx-asc-cell.hx-pad {
+  opacity: 0;
+  pointer-events: none;
+}
+.asc-dot {
+  opacity: 0.8;
+}
+.asc-vis {
+  opacity: 1;
+  color: #fafafa;
+}
+.hx-asc-cell:hover {
+  background: #ffffff22;
+}
+.hx-asc-cell.hx-sel,
+.hx-asc-cell.hx-range {
+  background: #2a82da55;
+}
+
+.hx-status {
+  padding: 6px 8px;
+  font-family: monospace;
+  color: #aaa;
+  border-top: 1px solid #333;
+  background: #111;
+}
+
+.hx-menu {
+  position: absolute;
+  background: #222;
+  border: 1px solid #555;
+  border-radius: 6px;
+  color: #fff;
+  font-family: monospace;
+  padding: 6px;
+  z-index: 5;
+  min-width: 200px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+.hx-menu hr {
+  border-color: #444;
+  margin: 6px 0;
+}
+.hx-menu button {
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px;
+  background: transparent;
+  border: none;
+  color: #eee;
+  cursor: pointer;
+}
+.hx-menu-head {
+  padding: 6px 8px;
+  opacity: 0.85;
+}

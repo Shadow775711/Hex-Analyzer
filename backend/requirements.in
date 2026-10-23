@@ -1,0 +1,8 @@
+# Top-level runtime dependencies. The lock with hashes (requirements.txt) is generated from this:
+#   pip-compile --generate-hashes --strip-extras --allow-unsafe -o requirements.txt requirements.in
+# (run inside python:3.12-slim — the lock is for the Docker image's Python)
+fastapi==0.161.1
+uvicorn==0.54.0
+python-multipart==0.0.32
+sqlalchemy==2.1.6
+numpy==2.5.4

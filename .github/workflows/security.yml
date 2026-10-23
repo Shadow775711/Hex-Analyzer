@@ -1,0 +1,105 @@
+# Security and copyright scanners (free, no accounts or tokens).
+# Actions are pinned to a full commit hash, not a tag: in March 2026 the trivy-action tags
+# were re-pointed to malicious code (CVE-2026-33634) — a hash cannot be swapped.
+# Dependabot updates the hashes (version noted in the comment next to them).
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 4 * * 1" # every Monday — new vulnerabilities appear without code changes
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  codeql:
+    # Code analysis: SQL injection, XSS, path traversal, command injection… (Python and JS)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write # results in Security → Code scanning
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python, javascript-typescript]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+          queries: security-extended
+      - uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  trivy:
+    # Vulnerabilities in Docker images (base OS + libraries) and secrets leaked into the repo
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Build images
+        run: docker compose -p hexci build --pull backend frontend
+      - name: Secrets in the repository
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scanners: secret
+          exit-code: "1"
+      - name: Backend image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: hexci-backend
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true # block only what can be fixed (image/package update)
+          exit-code: "1"
+      - name: Frontend image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: hexci-frontend
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+      - name: Caddy image (report only)
+        # Caddy is a third-party image: its fixes come with a new Caddy release (Dependabot
+        # proposes it), so findings here are reported but do not block unrelated PRs.
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: caddy:2.11.7@sha256:504a44d7d74bd2bc28a66afc4774912fc21223ca8a67734af1c54ab2f999b489
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "0"
+
+  scanoss:
+    # Copied code: compares fingerprints of our files with an open-source code database
+    # (osskb.org) and blocks fragments under copyleft licenses (GPL etc.).
+    # Fork PRs get a read-only token, so the action could not comment — they are scanned
+    # on push to main after merge instead.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write # comment with results on the PR
+      checks: write
+      actions: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: scanoss/gha-code-scan@d3c8f659544885761c8e3b96743ea14b830474aa # v1.7.0
+        with:
+          policies: copyleft

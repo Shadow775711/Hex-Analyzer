@@ -1,0 +1,43 @@
+# Frontend builds
+frontend/build/
+frontend/dist/
+
+# Uploaded data and databases — anywhere in the repo, whatever DATA_DIR a local run used
+data/
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+*.sqlite
+*.sqlite3
+backend/data/
+backend/uploads/
+backend/instance/
+backend/archive/
+backend/jobs/
+
+# System / tools
+*.log
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Node and Python
+node_modules/
+
+# Local configuration and keys (.env.example is the template)
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Caddy: only these files belong in git — everything else in caddy/ (password.txt,
+# auth.caddy, editor backups like password.txt~) stays local
+caddy/*
+!caddy/Caddyfile
+!caddy/README.md
+!caddy/set-password.sh
+*.crt

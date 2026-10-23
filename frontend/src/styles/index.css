@@ -1,0 +1,557 @@
+/* ─────────────────────────────────────────────
+   Hex Analyzer — custom styles (no Mantine)
+   Colors live in variables: change the theme in one place.
+   ───────────────────────────────────────────── */
+:root {
+  --bg: #141414;
+  --surface: #1e1e1e;
+  --surface-2: #262626;
+  --border: #2f2f2f;
+  --text: #e6e6e6;
+  --muted: #8a8a8a;
+  --accent: #2a82da;
+  --accent-hover: #3b93eb;
+  --danger: #e5484d;
+  --warn: #d9a400;
+  --info: #3b82f6;
+  --radius: 8px;
+  --mono: ui-monospace, Menlo, Consolas, monospace;
+  --header-h: 72px;
+
+  /* entropy colors (“File” tab) */
+  --ent-low: #4b5563;
+  --ent-mid: #3b82f6;
+  --ent-high: #f59e0b;
+  --ent-max: #ef4444;
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Ubuntu,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+code {
+  font-family: var(--mono);
+  background: var(--surface-2);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* ── Layout ────────────────────────────── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: var(--header-h);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.main {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 13px;
+}
+
+.label {
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+/* ── Cards ─────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.card--inner {
+  background: var(--surface-2);
+  padding: 12px 14px;
+  box-shadow: none;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stack--tight {
+  gap: 4px;
+}
+
+.center {
+  align-items: center;
+  text-align: center;
+}
+
+/* ── Buttons and inputs ────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 120ms,
+    border-color 120ms;
+}
+
+.btn:hover:not(:disabled) {
+  background: #303030;
+  border-color: #444;
+}
+
+.btn:focus-visible,
+.tab:focus-visible,
+.input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn--sm {
+  padding: 4px 8px;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+/* hidden <input type="file"> — you click the <label class="btn"> */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ── Alerts ────────────────────────────── */
+.alert {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  border-left: 4px solid currentColor;
+  background: var(--surface-2);
+}
+
+.alert--error {
+  color: var(--danger);
+}
+.alert--warn {
+  color: var(--warn);
+}
+.alert--info {
+  color: var(--info);
+}
+
+/* ── Tabs ──────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.tab[aria-selected='true'] {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Progress and spinner ──────────────── */
+.progress {
+  width: 320px;
+  max-width: 100%;
+  height: 8px;
+  appearance: none;
+  border: none;
+  border-radius: 4px;
+  background: #222;
+  overflow: hidden;
+}
+
+.progress::-webkit-progress-bar {
+  background: #222;
+}
+.progress::-webkit-progress-value {
+  background: var(--accent);
+}
+.progress::-moz-progress-bar {
+  background: var(--accent);
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Key: value list ───────────────────── */
+.kv {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 4px 12px;
+  margin: 0;
+}
+
+.kv dt {
+  color: var(--muted);
+}
+.kv dd {
+  margin: 0;
+  word-break: break-word;
+}
+
+.badge {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+/* ── Small helpers ─────────────────────── */
+.mono {
+  font-family: var(--mono);
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-bar {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 8px;
+  min-width: 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.table th {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ── Entropy profile ───────────────────── */
+.entropy-chart {
+  width: 100%;
+  height: 120px;
+  background: var(--bg);
+  border-radius: 6px;
+  display: block;
+}
+
+.entropy-grid {
+  stroke: var(--border);
+  stroke-width: 0.03;
+}
+
+.entropy-bar {
+  cursor: pointer;
+}
+.entropy-bar:hover {
+  opacity: 0.7;
+}
+
+.entropy-legend,
+.graph-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  align-items: center;
+}
+
+.entropy-legend i,
+.graph-legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  vertical-align: -1px;
+  border-radius: 2px;
+}
+
+.graph-legend i.dot {
+  border-radius: 50%;
+}
+
+/* ── Relations (list) ──────────────────── */
+.link-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.link-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.link-row:last-child {
+  border-bottom: none;
+}
+
+.sim {
+  position: relative;
+  width: 120px;
+  height: 18px;
+  background: var(--bg);
+  border-radius: 4px;
+  overflow: hidden;
+  font-size: 12px;
+  text-align: center;
+  line-height: 18px;
+}
+
+.sim-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: #f59e0b55;
+}
+
+.sim span {
+  position: relative;
+}
+
+/* ── Graph ─────────────────────────────── */
+.graph {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.graph-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.graph-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.graph-toggle input {
+  accent-color: var(--c);
+}
+
+.graph-swatch {
+  width: 18px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--c);
+}
+
+.graph-slider {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.graph-slider input {
+  width: 120px;
+  accent-color: #f59e0b;
+}
+
+.graph-spacer {
+  flex: 1;
+}
+
+.graph-canvas {
+  position: relative;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.graph-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.graph-empty {
+  padding: 40px;
+  text-align: center;
+}
+
+.graph-panel {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: min(420px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* ── Narrow screens ────────────────────── */
+@media (max-width: 640px) {
+  :root {
+    --header-h: auto;
+  }
+  .header {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+  }
+  .tabs {
+    overflow-x: auto;
+  }
+  .kv {
+    grid-template-columns: 1fr;
+  }
+  .kv dt {
+    margin-top: 6px;
+  }
+  .link-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .link-row .sim {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2s;
+  }
+}
