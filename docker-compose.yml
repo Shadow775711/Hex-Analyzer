@@ -18,7 +18,7 @@ services:
       ARCHIVE: "1"          # 0 = no .gz copies
       JOB_TTL_HOURS: "0"    # e.g. 72 = clean up jobs older than 3 days
       # Host headers the backend accepts (DNS rebinding protection); localhost = healthcheck
-      ALLOWED_HOSTS: "${HEX_HOSTS:-localhost},localhost"
+      ALLOWED_HOSTS: "${HEX_HOSTS:-*},localhost,127.0.0.1"
     volumes:
       - hex_data:/app/data  # uploads/, jobs/, archive/, tmp/ and hex.db in one place
     tmpfs:
@@ -32,10 +32,11 @@ services:
     <<: *hardening
     build: ./frontend
     container_name: hex-frontend
-    # no "ports": reachable from outside only through Caddy (HTTPS + password)
+    ports:
+      - "${HEX_PORT:-8080}:8080"
     tmpfs:
       - /tmp:size=32m       # nginx pid file and small temp files (uploads are streamed, not buffered)
-    networks: [edge, app]   # the only bridge between Caddy and the backend
+    networks: [edge, app]   # the bridge between Caddy and the backend
     mem_limit: 128m
     pids_limit: 64
     depends_on:
@@ -43,6 +44,7 @@ services:
         condition: service_healthy
 
   caddy:
+    profiles: ["caddy"]
     <<: *hardening
     image: caddy:2.11.7@sha256:504a44d7d74bd2bc28a66afc4774912fc21223ca8a67734af1c54ab2f999b489
     container_name: hex-caddy

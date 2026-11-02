@@ -92,8 +92,8 @@ Python 3.12; on another Python version `pip` may not find a hashed wheel for eve
 ```bash
 docker compose up -d --build
 ```
-The backend does **not** expose a port to the outside — it is reachable only through nginx
-at `https://<host>/api/...` (Caddy: HTTPS + password, see the README and `caddy/README.md`). Data lives in the `hex_data` volume.
+The backend does **not** expose a port to the outside — it is reachable through the frontend's nginx
+at `http://<host>:8080/api/...` (or `https://<host>/api/...` when running Caddy with `--profile caddy`). Data lives in the `hex_data` volume.
 
 The image is built from a digest-pinned `python:3.12.15-slim` and installs dependencies with
 `pip install --require-hashes` (only the exact locked files). In compose the container has a read-only root
@@ -402,7 +402,7 @@ The old `signatures.db` file is no longer used.
 - In Docker the backend is not exposed to the host and runs as a regular user (uid 10001), with a read-only root
   filesystem, no capabilities, `no-new-privileges` and memory/process limits
 - Dependencies installed only from the hashed lock (`--require-hashes`), base image pinned by digest
-- The backend itself has no login — in Docker the password and HTTPS are provided by Caddy (`basic_auth`, see `caddy/README.md`); do not expose it to a network without such a layer
+- The backend itself has no login — in Docker the password and HTTPS can optionally be provided by Caddy (`--profile caddy`, see `caddy/README.md`); do not expose it to an untrusted public network without such a layer
 
 Reporting vulnerabilities: [SECURITY.md](../SECURITY.md).
 
@@ -447,7 +447,7 @@ CI (`.github/workflows/ci.yml`) runs the same on every push and pull request.
 
 ### cURL
 ```bash
-# locally: http://localhost:8000, in Docker: https://localhost/api (curl -u admin:PASSWORD --cacert caddy-hex-root.crt)
+# locally: http://localhost:8000, in Docker: http://localhost:8080/api (or https://localhost/api with --profile caddy)
 # POST/DELETE require the X-Hex-Analyzer header (otherwise 403)
 curl -H "X-Hex-Analyzer: 1" -F "file=@/path/to/file.exe" http://localhost:8000/upload
 curl http://localhost:8000/jobs/<job_id>

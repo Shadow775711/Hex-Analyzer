@@ -45,7 +45,8 @@ to the end of an image or an ELF program inside a firmware image.
 Via the API (takes effect immediately, no restart):
 
 ```bash
-curl -X POST https://localhost/api/types -u admin:PASSWORD --cacert caddy-hex-root.crt \
+# In Docker (default): http://localhost:8080/api/types (or https://localhost/api/types with --profile caddy)
+curl -X POST http://localhost:8080/api/types \
   -H "X-Hex-Analyzer: 1" \
   -H "Content-Type: application/json" \
   -d '{"name": "My format", "extension": "myf", "magic": "4D 59 46 31", "offset": 0, "scan_inside": true}'
@@ -54,7 +55,7 @@ curl -X POST https://localhost/api/types -u admin:PASSWORD --cacert caddy-hex-ro
 `magic` can be given in any HEX notation (`4D594631`, `4d 59 46 31`, `0x4D:59:46:31`).
 It is stored as `4D594631`. Invalid HEX gives error 422.
 
-- Replace `admin` with your login from `./caddy/set-password.sh`; the password is in `caddy/password.txt`.
+- When using Caddy (`--profile caddy`), add `-u admin:PASSWORD --cacert caddy-hex-root.crt` using login from `./caddy/set-password.sh`.
 - The `X-Hex-Analyzer` header (any value) is required on every `POST`/`DELETE` — without it 403 (CSRF protection).
 - There can be at most `MAX_CUSTOM_TYPES` custom signatures (200 by default; each one slows down analysis) — beyond that 409.
 
@@ -63,7 +64,7 @@ List of signatures: `GET /api/types`.
 ### Deleting a custom signature
 
 ```bash
-curl -X DELETE https://localhost/api/types/42 -u admin:PASSWORD --cacert caddy-hex-root.crt \
+curl -X DELETE http://localhost:8080/api/types/42 \
   -H "X-Hex-Analyzer: 1"
 ```
 

@@ -45,22 +45,22 @@
 git clone https://github.com/your-username/hex-analyzer.git
 cd hex-analyzer
 
-# Addresses the app should answer on (the HTTPS certificate will be issued for them)
-cp .env.example .env        # and fix the IP address (HEX_HOSTS, HEX_DEFAULT_SNI, HEX_BIND)
-
-# App login and password (default login "admin"; a different one: ./caddy/set-password.sh john)
-./caddy/set-password.sh
-# … creates caddy/password.txt (password) and caddy/auth.caddy (hash) — both outside git
-# (required: docker compose refuses to start without caddy/auth.caddy)
-
+# Start backend & frontend
 docker compose up -d
 
-# App: https://localhost  (login + password)
-# From the LAN (https://192.168.1.50) only with HEX_BIND set to the LAN IP or 0.0.0.0 in .env
-# API: https://localhost/api/...
+# App: http://localhost:8080
+# API: http://localhost:8080/api/...
 ```
 
-**HTTPS and login** are provided by Caddy (`caddy/Caddyfile`): its own CA (`tls internal`), a password
+To run with HTTPS and password protection via Caddy:
+```bash
+cp .env.example .env
+./caddy/set-password.sh
+docker compose --profile caddy up -d
+# App: https://localhost (login + password)
+```
+
+**HTTPS and login** can optionally be enabled with Caddy (`--profile caddy`): its own CA (`tls internal`), a password
 (`basic_auth`, bcrypt cost 10), redirect from HTTP, security headers (CSP, a 1-day HSTS, Permissions-Policy, COOP/CORP — also on error responses).
 Details (password files, changing the login, access by IP): [caddy/README.md](caddy/README.md). It only answers on the addresses
 in `HEX_HOSTS` — other host names get an empty response (protection against DNS rebinding); the backend checks
@@ -71,7 +71,7 @@ To keep the browser from warning you, import the Caddy CA as a trusted authority
 (Firefox: Settings → Privacy & Security → Certificates → Authorities → Import).
 Do not delete the `caddy_data` volume — a new CA would have to be imported again on every device.
 
-The backend and frontend do not publish their own ports — the only way in from outside is through Caddy (443, with 80 redirecting to HTTPS), which forwards traffic to nginx in the frontend (`frontend:8080`); nginx forwards `/api` to the backend. The frontend starts only once the backend healthcheck (`/ping`, defined in `backend/Dockerfile`) reports ready. All data goes to a single `hex_data` volume (`/app/data`).
+By default, the frontend publishes port 8080 (`http://localhost:8080`, configurable via `HEX_PORT`), and its nginx reverse proxies `/api` to the backend. The frontend starts only once the backend healthcheck (`/ping`, defined in `backend/Dockerfile`) reports ready. All data goes to a single `hex_data` volume (`/app/data`).
 
 Containers do not run as root: the backend runs as user `app` (uid 10001), the frontend uses the `nginxinc/nginx-unprivileged` image (port 8080). All three have a read-only root filesystem, drop every Linux capability (Caddy gets back only `NET_BIND_SERVICE`), run with `no-new-privileges` and have memory/process limits. Base images and the Caddy image are pinned by digest. Caddy gets only `Caddyfile` and `auth.caddy` — `password.txt` is not mounted.
 
@@ -545,6 +545,8 @@ services:
   frontend:
     <<: *hardening
     build: ./frontend
+    ports:
+      - "${HEX_PORT:-8080}:8080"
     tmpfs: [/tmp:size=32m]
     mem_limit: 128m
     pids_limit: 64
@@ -553,6 +555,7 @@ services:
         condition: service_healthy
 
   caddy:
+    profiles: ["caddy"]
     <<: *hardening
     image: caddy:2.11.7@sha256:…   # pinned by digest
     cap_add: [NET_BIND_SERVICE]

@@ -66,6 +66,7 @@ versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `robots.txt` with `Disallow: /`.
 
 ### Changed
+- Docker: frontend publishes port 8080 (`http://localhost:8080`, configurable via `HEX_PORT`) directly, removing the need for manual password setup to access the UI; Caddy is available via `--profile caddy`.
 - Backend: plain SQLAlchemy 2.0 instead of Flask-SQLAlchemy; single-pass analysis
   (numpy), without loading the whole file into memory; all data in `DATA_DIR`.
 - Frontend: Vite instead of the abandoned Create React App; custom CSS instead of Mantine.

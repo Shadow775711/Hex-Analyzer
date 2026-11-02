@@ -36,5 +36,5 @@ echo "Login: $LOGIN — password saved to caddy/password.txt"
 cd "$DIR/.."   # docker compose needs the project directory
 if docker compose ps --status running caddy 2>/dev/null | grep -q caddy; then
   # recreate rather than restart, so the container is guaranteed to see the current file
-  docker compose up -d --force-recreate caddy >/dev/null 2>&1 && echo "Caddy reloaded."
+  docker compose --profile caddy up -d --force-recreate caddy >/dev/null 2>&1 && echo "Caddy reloaded."
 fi

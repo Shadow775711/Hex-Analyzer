@@ -26,8 +26,9 @@ Deliberate assumptions:
 - **Every logged-in user has full access**: they see all files (the graph reveals the job IDs
   of other files), can delete them and add signatures. The application does not distinguish users —
   there is one shared login, so job IDs being visible to every logged-in user is by design, not a leak.
-- **Login and HTTPS are provided by Caddy** (`caddy/`). Exposing the backend or the frontend
-  bypassing Caddy means no authentication — don't do it. By default Caddy listens only on
+- **Login and HTTPS can be enabled with Caddy** (`--profile caddy`). By default the frontend
+  is exposed on port 8080 without authentication for local use. Do not expose it to an untrusted
+  public network without Caddy or an authentication layer. By default Caddy listens only on
   `127.0.0.1` (`HEX_BIND`); Docker publishes ports past the host firewall, so `0.0.0.0` really
   means every network the computer joins.
 - **Do not expose the application to the internet** without an additional layer (VPN, a reverse

@@ -13,7 +13,7 @@ cp .env.example .env        # and fix the IP address
 ./caddy/set-password.sh
 
 # 3. start
-docker compose up -d
+docker compose --profile caddy up -d
 ```
 
 Local files (in `.gitignore`, never commit them):
@@ -24,7 +24,7 @@ Local files (in `.gitignore`, never commit them):
 | `caddy/auth.caddy` | login + bcrypt hash of the password — the only file Caddy gets; mode 644 because Caddy runs without capabilities and cannot bypass file permissions (a hash of a random ~130-bit password is not crackable) |
 | `.env` | `HEX_HOSTS`, `HEX_DEFAULT_SNI`, `HEX_BIND` |
 
-`docker compose up` refuses to start if `caddy/auth.caddy` is missing — run `set-password.sh` first.
+`docker compose --profile caddy up` refuses to start if `caddy/auth.caddy` is missing — run `set-password.sh` first.
 
 The password is random (~130 bits), so the script uses bcrypt cost 10: a higher cost would add
 no protection, only make every failed login burn ~1 s of CPU (an easy denial of service).
