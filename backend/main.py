@@ -171,7 +171,23 @@ app.add_middleware(TrustedHostMiddleware, allowed_hosts=ALLOWED_HOSTS)
 # HELPERS
 # ──────────────────────────────────────────────────────────────────────────────
 def _job_dir(job_id: str) -> Path:
-    return JOBS_DIR / job_id
+    if not re.fullmatch(r"^[0-9a-f]{32}$", job_id):
+        raise HTTPException(status_code=400, detail="Invalid job_id")
+    base = os.path.realpath(str(JOBS_DIR))
+    fullpath = os.path.realpath(os.path.join(base, job_id))
+    if not fullpath.startswith(base + os.sep):
+        raise HTTPException(status_code=400, detail="Invalid job_id")
+    return Path(fullpath)
+
+
+def _archive_dir(job_id: str) -> Path:
+    if not re.fullmatch(r"^[0-9a-f]{32}$", job_id):
+        raise HTTPException(status_code=400, detail="Invalid job_id")
+    base = os.path.realpath(str(ARCHIVE_DIR))
+    fullpath = os.path.realpath(os.path.join(base, job_id))
+    if not fullpath.startswith(base + os.sep):
+        raise HTTPException(status_code=400, detail="Invalid job_id")
+    return Path(fullpath)
 
 
 def _write_json(path: Path, obj: Any) -> None:
@@ -217,7 +233,7 @@ def _safe_filename(raw: str | None) -> str:
 
 def archive_copy_gzip(src_path: Path, job_id: str, sha256: str) -> None:
     """Compressed copy to archive/<job_id>/input.bin.gz (the original stays)."""
-    job_archive = ARCHIVE_DIR / job_id
+    job_archive = _archive_dir(job_id)
     job_archive.mkdir(parents=True, exist_ok=True)
     dst = job_archive / "input.bin.gz"
     # level 6: almost the size of 9 at a fraction of the CPU time
@@ -230,12 +246,19 @@ def archive_copy_gzip(src_path: Path, job_id: str, sha256: str) -> None:
 
 
 def _job_exists(job_id: str) -> bool:
-    return (_job_dir(job_id) / "meta.json").exists()
+    try:
+        return (_job_dir(job_id) / "meta.json").exists()
+    except (HTTPException, ValueError):
+        return False
 
 
 def delete_job(job_id: str) -> bool:
     """Removes everything a job left behind: upload, job directory, archive and DB entry."""
-    job_dir = _job_dir(job_id)
+    try:
+        job_dir = _job_dir(job_id)
+        archive_dir = _archive_dir(job_id)
+    except (HTTPException, ValueError):
+        return False
     if not job_dir.exists():
         return False
     with app.state.Session() as session:
@@ -249,7 +272,7 @@ def delete_job(job_id: str) -> bool:
         if not job_dir.exists():
             break
         time.sleep(0.05)
-    shutil.rmtree(ARCHIVE_DIR / job_id, ignore_errors=True)
+    shutil.rmtree(archive_dir, ignore_errors=True)
     return True
 
 
@@ -277,7 +300,7 @@ def _purge_orphans() -> None:
     entries += [(p, p.name) for p in ARCHIVE_DIR.iterdir()]
     for path, job_id in entries:
         try:
-            if _job_dir(job_id).exists() or path.lstat().st_mtime >= cutoff:
+            if _job_exists(job_id) or path.lstat().st_mtime >= cutoff:
                 continue
             log.info("Removing orphaned %s", path)
             if path.is_dir() and not path.is_symlink():
@@ -424,7 +447,7 @@ def _stored_path(job_id: str) -> Path | None:
     """The job's original in uploads/, or None (missing file, unreadable or damaged meta.json)."""
     try:
         p = UPLOAD_FOLDER / Path(_read_json(_job_dir(job_id) / "meta.json")["stored_name"]).name
-    except (OSError, ValueError, KeyError, TypeError):
+    except (OSError, ValueError, KeyError, TypeError, HTTPException):
         log.warning("Skipping job %s: unreadable meta.json", job_id)
         return None
     return p if p.exists() else None
